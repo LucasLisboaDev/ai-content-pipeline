@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 
 
 # ── Phase 1 Models ────────────────────────────────────────────────────────────
@@ -29,7 +29,7 @@ class ResearchBriefRequest(BaseModel):
     topic: str = Field(..., description="The blog post topic to research")
     target_audience: str = Field(
         default="general audience",
-        description="Who the content is written for (e.g. 'BJJ beginners', 'AI engineers')"
+        description="Who the content is written for"
     )
 
 
@@ -41,10 +41,39 @@ class OutlineSection(BaseModel):
 class ResearchBrief(BaseModel):
     topic: str
     target_audience: str
-    primary_keywords: List[str] = Field(..., description="Main keywords to target for SEO")
-    secondary_keywords: List[str] = Field(..., description="Supporting/LSI keywords")
-    competitor_gaps: List[str] = Field(..., description="Angles competitors are missing")
-    content_outline: List[OutlineSection] = Field(..., description="Full structured outline")
-    recommended_word_count: int = Field(..., description="Suggested word count for the post")
-    key_sources: List[str] = Field(..., description="URLs of valuable sources found during research")
-    content_angle: str = Field(..., description="The unique angle that makes this post stand out")
+    primary_keywords: List[str]
+    secondary_keywords: List[str]
+    competitor_gaps: List[str]
+    content_outline: List[OutlineSection]
+    recommended_word_count: int
+    key_sources: List[str]
+    content_angle: str
+
+
+# ── Phase 3 Models ────────────────────────────────────────────────────────────
+
+class DraftRequest(BaseModel):
+    topic: str = Field(..., description="The blog post topic")
+    target_audience: str = Field(default="general audience")
+    primary_keywords: List[str] = Field(..., description="Main SEO keywords to target")
+    secondary_keywords: List[str] = Field(default=[], description="Supporting keywords")
+    content_outline: List[OutlineSection] = Field(..., description="Structured outline from Phase 2")
+    content_angle: str = Field(..., description="Unique angle for this post")
+    recommended_word_count: int = Field(default=1500)
+
+
+class SEOMetadata(BaseModel):
+    meta_title: str = Field(..., description="SEO meta title (50-60 characters)")
+    meta_description: str = Field(..., description="SEO meta description (150-160 characters)")
+    slug: str = Field(..., description="URL-friendly slug for the post")
+    focus_keyword: str = Field(..., description="Primary keyword this post targets")
+
+
+class DraftResponse(BaseModel):
+    topic: str
+    markdown_content: str = Field(..., description="Full blog post in markdown format")
+    seo_metadata: SEOMetadata
+    word_count: int
+    keyword_density: dict = Field(..., description="Keyword occurrence counts in the draft")
+    seo_score: int = Field(..., ge=0, le=100, description="SEO quality score 0-100")
+    seo_suggestions: List[str] = Field(..., description="Actionable SEO improvement suggestions")
