@@ -77,3 +77,24 @@ class DraftResponse(BaseModel):
     keyword_density: dict = Field(..., description="Keyword occurrence counts in the draft")
     seo_score: int = Field(..., ge=0, le=100, description="SEO quality score 0-100")
     seo_suggestions: List[str] = Field(..., description="Actionable SEO improvement suggestions")
+
+
+# ── Phase 4 Models ────────────────────────────────────────────────────────────
+
+class PublishRequest(BaseModel):
+    topic: str = Field(..., description="The blog post topic")
+    markdown_content: str = Field(..., description="Full blog post markdown from Phase 3")
+    seo_metadata: "SEOMetadata" = Field(..., description="SEO metadata from Phase 3")
+    publish_status: str = Field(
+        default="draft",
+        description="Ghost post status: 'draft' or 'published'"
+    )
+    tags: List[str] = Field(default=[], description="Tags to attach to the post in Ghost")
+
+
+class PublishResponse(BaseModel):
+    success: bool
+    ghost_post_id: str = Field(..., description="The ID Ghost assigned to the post")
+    ghost_post_url: str = Field(..., description="The URL of the post in Ghost")
+    status: str = Field(..., description="Post status in Ghost: draft or published")
+    title: str = Field(..., description="The post title as published")
